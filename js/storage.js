@@ -22,6 +22,8 @@ const Storage = {
   savePreset(n) { this._set(this.KEYS.PRESET, n); },
 
   getFavoriteScene() { return this._get(this.KEYS.FAVORITE, null); },
+  saveRecentScene(n) { this._set(this.KEYS.FAVORITE, n); },
+  getRecentScene() { return this._get(this.KEYS.FAVORITE, null); },
   saveFavoriteScene(n) { this._set(this.KEYS.FAVORITE, n); },
 
   getStats() { return this._get(this.KEYS.STATS, { todayMinutes:0, streak:0, totalMinutes:0, lastDate:'' }); },
