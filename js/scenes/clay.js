@@ -116,20 +116,15 @@ class ClayScene {
 
   render() {
     const ctx=this.ctx, w=this.width, h=this.height;
-    const bgGrad=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,w*0.7);
+    if (w <= 0 || h <= 0) return;
+    const bgGrad=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)*0.7);
     bgGrad.addColorStop(0,'#2A2420'); bgGrad.addColorStop(1,'#1A1816');
     ctx.fillStyle=bgGrad; ctx.fillRect(0,0,w,h);
-
-    const imgData=ctx.createImageData(w,h);
-    const data=imgData.data;
-
-    for (let y=0; y<h; y+=2)
-      for (let x=0; x<w; x+=2) {
-        const gx=Math.floor(x/this.cellSize), gy=Math.floor(y/this.cellSize);
-        if (gx<0||gx>=this.gridW||gy<0||gy>=this.gridH) continue;
+    for (let gy=1; gy<this.gridH-1; gy++)
+      for (let gx=1; gx<this.gridW-1; gx++) {
         const height=this.grid[gy*this.gridW+gx];
         if (height<0.01) continue;
-
+        const x=gx*this.cellSize, y=gy*this.cellSize;
         const hL=this.grid[gy*this.gridW+Math.max(0,gx-1)];
         const hR=this.grid[gy*this.gridW+Math.min(this.gridW-1,gx+1)];
         const hU=this.grid[Math.max(0,gy-1)*this.gridW+gx];
@@ -139,24 +134,14 @@ class ClayScene {
         const dot=(nx*0.3-ny*0.5+nz*0.8)/nl;
         const diffuse=Math.max(0.15, dot*0.7+0.3);
         const depth=(1-height)*0.3;
-        const r=Math.min(255,Math.round((180-depth*50)*(diffuse+0.15)));
-        const g2=Math.min(255,Math.round((140-depth*40)*(diffuse+0.15)));
-        const b=Math.min(255,Math.round((100-depth*30)*(diffuse+0.15)));
-
-        for (let dy=0; dy<2&&y+dy<h; dy++)
-          for (let dx=0; dx<2&&x+dx<w; dx++) {
-            const i=((y+dy)*w+(x+dx))*4;
-            data[i]=r; data[i+1]=g2; data[i+2]=b; data[i+3]=255;
-          }
+        ctx.fillStyle='rgb('+Math.round((180-depth*50)*(diffuse+0.15))+','+Math.round((140-depth*40)*(diffuse+0.15))+','+Math.round((100-depth*30)*(diffuse+0.15))+')';
+        ctx.fillRect(x,y,this.cellSize,this.cellSize);
       }
-    ctx.putImageData(imgData,0,0);
-
     Object.values(this.touches).forEach(t=>{
       const glow=ctx.createRadialGradient(t.x,t.y,0,t.x,t.y,35);
       glow.addColorStop(0,'rgba(255,200,160,0.08)');
       glow.addColorStop(1,'transparent');
       ctx.fillStyle=glow; ctx.fillRect(t.x-35,t.y-35,70,70);
     });
-  }
-  destroy() {}
+  }destroy() {}
 }
