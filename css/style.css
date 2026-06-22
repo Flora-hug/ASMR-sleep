@@ -12,10 +12,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1A1D24;color:#F0EDE
 .home-greeting{font-size:28px;font-weight:300;letter-spacing:2px;color:#F0EDE8;margin-bottom:8px}
 .home-subtitle{font-size:14px;color:#A09888;font-weight:300}
 .scene-cards{flex:1;display:flex;flex-direction:column;gap:14px;padding:0 24px 20px;overflow-y:auto}
-.scene-card{--h:var(--card-hue,30);background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:18px 22px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all 0.3s ease;position:relative;overflow:hidden}
+.scene-card{--h:var(--card-hue,30);background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:18px 22px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all 0.4s cubic-bezier(0.32,0.72,0,1);position:relative;overflow:hidden}
 .scene-card::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,hsla(var(--h,30),50%,60%,0.12),transparent 70%);opacity:0;transition:opacity 0.4s}
 .scene-card:active::before,.scene-card:hover::before{opacity:1}
-.scene-card:active{transform:scale(0.97)}
+.scene-card:active{transform:scale(0.97)!important}
 .scene-card-icon{font-size:42px;line-height:1;flex-shrink:0;width:56px;height:56px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05);border-radius:14px}
 .scene-card-name{font-size:18px;font-weight:500;color:#F0EDE8;margin-bottom:3px}
 .scene-card-desc{font-size:13px;color:#A09888;font-weight:300}
@@ -96,3 +96,35 @@ select{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);
 /* ===== TRANSITIONS ===== */
 .page{transition:opacity 0.35s ease}
 .page.active{opacity:1}
+
+/* ===== HOME ENHANCED ===== */
+.scene-card:hover{transform:scale(1.03);box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+.scene-card-body{flex:1;display:flex;flex-direction:column;gap:2px}
+.scene-card-rating{display:flex;gap:2px;margin-top:4px}
+.star{color:rgba(255,255,255,0.15);font-size:14px;letter-spacing:2px}
+.star.filled{color:#FFB88C;text-shadow:0 0 6px rgba(255,184,140,0.3)}
+.section-label{font-size:13px;color:#A09888;font-weight:400;letter-spacing:1px;padding:0 24px 8px}
+.rec-section{padding:0 24px 12px}
+.rec-card{background:linear-gradient(135deg,rgba(255,184,140,0.08),rgba(126,200,227,0.06));border:1px solid rgba(255,184,140,0.12);border-radius:16px;padding:16px 18px;cursor:pointer;transition:all 0.4s cubic-bezier(0.32,0.72,0,1);position:relative;overflow:hidden}
+.rec-card:hover{transform:scale(1.02);background:linear-gradient(135deg,rgba(255,184,140,0.12),rgba(126,200,227,0.08))}
+.rec-card:active{transform:scale(0.98)}
+.rec-badge{position:absolute;top:10px;right:12px;font-size:11px;color:#FFB88C;background:rgba(255,184,140,0.12);padding:2px 8px;border-radius:6px;letter-spacing:0.5px}
+.rec-content{display:flex;align-items:center;gap:14px}
+.rec-icon{font-size:36px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border-radius:12px;flex-shrink:0}
+.rec-info{flex:1;min-width:0}
+.rec-name{font-size:17px;font-weight:500;color:#F0EDE8;margin-bottom:2px}
+.rec-desc{font-size:13px;color:#A09888;margin-bottom:6px}
+.rec-meta{display:flex;gap:16px;font-size:12px;color:#A09888}
+.rec-meta-item{display:flex;align-items:center;gap:4px}
+.recent-section{padding:4px 24px 12px}
+.recent-card{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:12px 16px;transition:all 0.3s cubic-bezier(0.32,0.72,0,1)}
+.recent-card:hover{background:rgba(255,255,255,0.06)}
+.recent-icon{font-size:28px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.03);border-radius:10px;flex-shrink:0}
+.recent-info{flex:1}
+.recent-name{font-size:15px;font-weight:500;color:#F0EDE8;margin-bottom:1px}
+.recent-label{font-size:12px;color:#A09888}
+.recent-stats{text-align:center}
+.recent-number{font-size:22px;font-weight:200;color:#FFB88C;font-variant-numeric:tabular-nums}
+.scene-cards{gap:16px}
+.home-header{padding:48px 28px 20px}
+.home-footer{padding:10px 28px 30px}
