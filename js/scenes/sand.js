@@ -172,5 +172,10 @@ class SandScene {
       ctx.fillStyle = glow; ctx.fillRect(t.x-40, t.y-40, 80, 80);
     });
   }
+  reset() {
+    this.revealMap = new Float32Array(this.revealW * this.revealH);
+    this._initParticles(this.width, this.height);
+    this.time = 0;
+  }
   destroy() {}
 }
