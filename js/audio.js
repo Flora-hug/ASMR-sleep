@@ -136,12 +136,10 @@ class ASMRAudio {
 
   updateAmbientVolume(val) {
     this.mixer.ambient = val / 100;
+    const targetVol = val / 100;
     Object.keys(this.active).forEach(k => {
       if (k.startsWith('ambient_')) {
-        this.active[k].gain.gain.setTargetAtTime(
-          parseFloat(this.active[k].gain.gain.value.toString().match(/[\d.]+/)?.[0]||0.3) * (val/50) || val/100,
-          this.ctx.currentTime, 0.1
-        );
+        this.active[k].gain.gain.value = targetVol * 0.5;
       }
     });
   }
@@ -244,7 +242,7 @@ class ASMRAudio {
   updateAtmosphereVolume(val) {
     this.mixer.atmosphere = val / 100;
     if (this._atmoNodes) {
-      this._atmoNodes.g.gain.setTargetAtTime(val/100 * 0.25, this.ctx.currentTime, 0.1);
+      this._atmoNodes.g.gain.value = val/100 * 0.3;
     }
   }
 
