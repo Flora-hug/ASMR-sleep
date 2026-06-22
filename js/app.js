@@ -28,6 +28,7 @@
     const page = document.getElementById('page-' + pageId);
     if (page) page.classList.add('active');
     state.currentPage = pageId;
+    if (pageId === 'home') { recommendScene(); updateRecentUsage(); }
   }
 
   function enterScene(sceneName) {
@@ -39,6 +40,7 @@
 
     const scene = sceneManager.switchTo(sceneName);
     if (scene) scene.resize(w, h);
+    Storage.saveRecentScene(sceneName);
 
     audio.resume();
     audio.startAmbient(Storage.getPreset());
@@ -166,6 +168,9 @@
     document.querySelectorAll('.preset-btn').forEach(b => b.classList.toggle('active', b.dataset.preset === savedPreset));
 
     document.querySelectorAll('.scene-card').forEach(card => card.addEventListener('click', () => enterScene(card.dataset.scene)));
+    document.getElementById('rec-card').addEventListener('click', function() { var s = this.dataset.scene; if (s) enterScene(s); });
+    recommendScene();
+    updateRecentUsage();
     document.getElementById('btn-back').addEventListener('click', exitScene);
     document.getElementById('btn-settings-nav').addEventListener('click', () => showPage('settings'));
     document.getElementById('btn-stats-nav').addEventListener('click', () => { StatsModule.render(); showPage('stats'); });
@@ -199,6 +204,40 @@
         sceneManager.resize(w, h);
       }
     });
+  }
+
+  function recommendScene() {
+    const picks = [
+      {name:'paper',title:'揉纸团',icon:'🧻',desc:'手指搓揉，纸张渐皱',sound:'🌲 森林',time:'15'},
+      {name:'sand',title:'拨沙画',icon:'🏖️',desc:'拨开细沙，浮现图案',sound:'🌊 海浪',time:'30'},
+      {name:'clay',title:'捏泥巴',icon:'🫛',desc:'按压塑形，随心创作',sound:'🔥 篾火',time:'20'}
+    ];
+    const p = picks[Math.floor(Math.random() * picks.length)];
+    const el = document.getElementById('rec-card');
+    if (!el) return;
+    document.getElementById('rec-scene-icon').textContent = p.icon;
+    document.getElementById('rec-scene-name').textContent = p.title;
+    document.getElementById('rec-scene-desc').textContent = p.desc;
+    document.getElementById('rec-sound').textContent = p.sound;
+    document.getElementById('rec-duration').textContent = p.time + ' 分钟';
+    el.dataset.scene = p.name;
+  }
+
+  function updateRecentUsage() {
+    const recent = Storage.getRecentScene();
+    const stats = StatsModule.load();
+    const map = { paper:{icon:'🧻',title:'揉纸团'}, sand:{icon:'🏖️',title:'拨沙画'}, clay:{icon:'🫛',title:'捏泥巴'} };
+    const nameEl = document.getElementById('recent-scene-name');
+    const iconEl = document.getElementById('recent-scene-icon');
+    const minEl = document.getElementById('recent-total-minutes');
+    if (recent && map[recent]) {
+      if (nameEl) nameEl.textContent = map[recent].title;
+      if (iconEl) iconEl.textContent = map[recent].icon;
+    } else {
+      if (nameEl) nameEl.textContent = '暂无';
+      if (iconEl) iconEl.textContent = '—';
+    }
+    if (minEl) minEl.textContent = Math.round(stats.totalMinutes);
   }
 
   if (document.readyState === 'loading') {
