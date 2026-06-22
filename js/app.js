@@ -324,6 +324,7 @@
       });
     });
 
+    document.getElementById('btn-reset').addEventListener('click', () => { if (currentSceneObj && typeof currentSceneObj.reset === 'function') currentSceneObj.reset(); });
     document.getElementById('btn-breath').addEventListener('click', startBreath);
     document.getElementById('btn-breath-close').addEventListener('click', stopBreath);
     document.getElementById('btn-vibration').addEventListener('click', () => {
