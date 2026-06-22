@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1A1D24">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>触眠 · ASMR 触感助眠</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME PAGE -->
+  <div id="page-home" class="page active">
+    <div class="home-header">
+      <div class="home-greeting">今晚想玩什么？</div>
+      <div class="home-subtitle">选一个材质，用手指放松入睡</div>
+    </div>
+    <div class="scene-cards">
+      <div class="scene-card" data-scene="paper" style="--card-hue:30">
+        <div class="scene-card-icon">🧻</div>
+        <div class="scene-card-name">揉纸团</div>
+        <div class="scene-card-desc">手指搓揉，纸张渐皱</div>
+      </div>
+      <div class="scene-card" data-scene="sand" style="--card-hue:200">
+        <div class="scene-card-icon">🏖️</div>
+        <div class="scene-card-name">拨沙画</div>
+        <div class="scene-card-desc">拨开细沙，浮现图案</div>
+      </div>
+      <div class="scene-card" data-scene="clay" style="--card-hue:120">
+        <div class="scene-card-icon">🫘</div>
+        <div class="scene-card-name">捏泥巴</div>
+        <div class="scene-card-desc">按压塑形，随心创作</div>
+      </div>
+    </div>
+    <div class="home-footer">
+      <button class="home-footer-btn" id="btn-stats-nav">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-6"/></svg>
+        <span>使用记录</span>
+      </button>
+      <button class="home-footer-btn" id="btn-settings-nav">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <span>设置</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- SCENE PAGE -->
+  <div id="page-scene" class="page">
+    <div id="scene-canvas-container">
+      <canvas id="scene-canvas"></canvas>
+    </div>
+    <div id="scene-topbar">
+      <button id="btn-back" class="topbar-btn" aria-label="返回">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div id="scene-title">揉纸团</div>
+      <button id="btn-timer" class="topbar-btn" aria-label="定时">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      </button>
+    </div>
+    <div id="timer-overlay" class="hidden">
+      <div class="timer-panel">
+        <div class="timer-title">定时关闭</div>
+        <div class="timer-options">
+          <button class="timer-opt" data-min="15">15分</button>
+          <button class="timer-opt" data-min="30">30分</button>
+          <button class="timer-opt" data-min="45">45分</button>
+          <button class="timer-opt" data-min="60">60分</button>
+          <button class="timer-opt" data-min="0">取消</button>
+        </div>
+        <div id="timer-countdown" class="hidden">剩余 <span id="timer-display">00:00</span></div>
+      </div>
+    </div>
+    <div id="mixer-panel">
+      <div id="mixer-handle">
+        <div class="mixer-handle-bar"></div>
+      </div>
+      <div id="mixer-content">
+        <div class="mixer-row">
+          <div class="mixer-label"><span class="mixer-icon">🌧️</span><span>环境音</span></div>
+          <input type="range" class="mixer-slider" id="mixer-ambient" min="0" max="100" value="40">
+        </div>
+        <div class="mixer-row">
+          <div class="mixer-label"><span class="mixer-icon">🎵</span><span>氛围层</span></div>
+          <input type="range" class="mixer-slider" id="mixer-atmosphere" min="0" max="100" value="30">
+        </div>
+        <div class="mixer-row">
+          <div class="mixer-label"><span class="mixer-icon">🔊</span><span>交互音效</span></div>
+          <input type="range" class="mixer-slider" id="mixer-interaction" min="0" max="100" value="60">
+        </div>
+        <div class="mixer-presets">
+          <button class="preset-btn active" data-preset="rain">🌧️ 雨夜</button>
+          <button class="preset-btn" data-preset="forest">🌲 森林</button>
+          <button class="preset-btn" data-preset="campfire">🔥 篝火</button>
+          <button class="preset-btn" data-preset="ocean">🌊 海浪</button>
+        </div>
+        <div class="mixer-extra">
+          <button id="btn-breath" class="mixer-extra-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12c0-2.21 1.79-4 4-4s4 1.79 4 4"/></svg>
+            呼吸引导
+          </button>
+          <button id="btn-vibration" class="mixer-extra-btn active">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8v8M6 5v14M10 2v20M14 2v20M18 5v14M22 8v8"/></svg>
+            震动
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="breath-overlay" class="hidden">
+      <div class="breath-circle" id="breath-circle">
+        <div class="breath-text" id="breath-text">吸气</div>
+      </div>
+      <button id="btn-breath-close" class="breath-close">✕</button>
+    </div>
+  </div>
+
+  <!-- SETTINGS PAGE -->
+  <div id="page-settings" class="page">
+    <div class="settings-header">
+      <button id="btn-settings-back" class="topbar-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="settings-title">设置</div>
+    </div>
+    <div class="settings-body">
+      <div class="settings-group">
+        <div class="settings-item">
+          <span>自动定时关闭</span>
+          <select id="settings-timer">
+            <option value="0">关闭</option>
+            <option value="15" selected>15 分钟</option>
+            <option value="30">30 分钟</option>
+            <option value="45">45 分钟</option>
+            <option value="60">60 分钟</option>
+          </select>
+        </div>
+        <div class="settings-item">
+          <span>震动反馈</span>
+          <label class="toggle"><input type="checkbox" id="settings-vibration" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="settings-item">
+          <span>夜间模式</span>
+          <label class="toggle"><input type="checkbox" id="settings-nightmode" checked><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+      <div class="settings-group">
+        <div class="settings-item">
+          <span>关于触眠</span>
+          <span class="settings-value">v1.0.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS PAGE -->
+  <div id="page-stats" class="page">
+    <div class="settings-header">
+      <button id="btn-stats-back" class="topbar-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="settings-title">使用记录</div>
+    </div>
+    <div class="stats-body">
+      <div class="stats-card">
+        <div class="stats-number" id="stats-today">0</div>
+        <div class="stats-label">今日使用（分钟）</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-number" id="stats-streak">0</div>
+        <div class="stats-label">连续使用（天）</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-number" id="stats-total">0</div>
+        <div class="stats-label">累计使用（分钟）</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="js/utils.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/scenes/paper.js"></script>
+<script src="js/scenes/sand.js"></script>
+<script src="js/scenes/clay.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
