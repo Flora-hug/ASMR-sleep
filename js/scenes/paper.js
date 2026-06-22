@@ -1,91 +1,95 @@
-﻿// paper.js - 揉纸团 Scene
-class PaperScene {
-  constructor(canvas) {
-    this.canvas = canvas;
-    this.ctx = canvas.getContext('2d', { willReadFrequently: false });
-    this.width = 0; this.height = 0;
-    this.touches = {};
-    this.wrinkleMap = [];
-    this.wrinkleGrid = { cols: 0, rows: 0, cellSize: 4 };
-    this.wrinkleIntensity = 0;
-    this.time = 0;
-    this.lastMoveTime = 0;
-    this.moveIntensity = 0;
-  }
-
-  resize(w, h) {
-    this.width = w; this.height = h;
-    this.canvas.width = w * devicePixelRatio;
-    this.canvas.height = h * devicePixelRatio;
-    this.ctx.scale(devicePixelRatio, devicePixelRatio);
-    this.wrinkleGrid.cols = Math.ceil(w / this.wrinkleGrid.cellSize);
-    this.wrinkleGrid.rows = Math.ceil(h / this.wrinkleGrid.cellSize);
-    this.wrinkleMap = new Float32Array(this.wrinkleGrid.cols * this.wrinkleGrid.rows);
-  }
-
-  addTouch(id, x, y) {
-    this.touches[id] = { x, y, px: x, py: y, startX: x, startY: y, time: Date.now() };
-    this._addWrinkle(x, y, 35);
-    this.wrinkleIntensity = Math.min(1, this.wrinkleIntensity + 0.2);
-    audio.playPaperCrinkle(0.3);
-    this._tryVibrate(10);
-  }
-
-  moveTouch(id, x, y) {
-    const t = this.touches[id]; if (!t) return;
-    const dx = x - t.x, dy = y - t.y;
-    const speed = Math.hypot(dx, dy);
-    t.px = t.x; t.py = t.y; t.x = x; t.y = y;
-    if (speed > 1) {
-      const intensity = Math.min(1, speed / 15);
-      this._addWrinkleAlong(t.px, t.py, x, y, intensity * 25);
-      this.wrinkleIntensity = Math.min(1, this.wrinkleIntensity + intensity * 0.15);
-      this.moveIntensity = intensity;
-      this.lastMoveTime = Date.now();
-      audio.playPaperCrinkle(intensity * 0.6 + 0.2);
-      this._tryVibrate(Math.round(intensity * 15));
+render() {
+    const ctx=this.ctx, w=this.width, h=this.height, g=this.wrinkleGrid;
+    if (w <= 0 || h <= 0) return;
+    
+    // Smooth paper background gradient
+    const bgLit = 82 - this.wrinkleIntensity * 8;
+    const grad=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)*0.6);
+    grad.addColorStop(0, 'hsl(38,10%,'+(bgLit+2)+'%)');
+    grad.addColorStop(1, 'hsl(38,15%,'+(bgLit-8)+'%)');
+    ctx.fillStyle=grad; ctx.fillRect(0,0,w,h);
+    
+    // Subtle paper grain (small noise dots)
+    ctx.save();
+    for(let i=0;i<300;i++){
+      ctx.globalAlpha=0.04+Math.random()*0.06;
+      ctx.fillStyle='hsl(38,8%,'+(40+Math.random()*20)+'%)';
+      ctx.beginPath(); ctx.arc(Math.random()*w,Math.random()*h,1+Math.random()*2,0,Math.PI*2); ctx.fill();
     }
-  }
-
-  removeTouch(id) { delete this.touches[id]; }
-
-  _addWrinkle(x, y, radius) {
-    const g = this.wrinkleGrid;
-    const cx = Math.floor(x / g.cellSize), cy = Math.floor(y / g.cellSize);
-    const r = Math.ceil(radius / g.cellSize);
-    for (let dy = -r; dy <= r; dy++)
-      for (let dx = -r; dx <= r; dx++) {
-        const gx = cx+dx, gy = cy+dy;
-        if (gx<0||gx>=g.cols||gy<0||gy>=g.rows) continue;
-        const d = Math.hypot(dx, dy);
-        if (d>r) continue;
-        this.wrinkleMap[gy*g.cols+gx] = Math.min(1, this.wrinkleMap[gy*g.cols+gx] + (1-d/r)*0.9 + Utils.rand(0,0.2));
-      }
-  }
-
-  _addWrinkleAlong(x1,y1,x2,y2,radius) {
-    const steps = Math.ceil(Utils.dist(x1,y1,x2,y2)/2);
-    for (let i=0;i<=steps;i++)
-      this._addWrinkle(Utils.lerp(x1,x2,i/steps)+Utils.rand(-2,2),Utils.lerp(y1,y2,i/steps)+Utils.rand(-2,2),radius*(0.5+Utils.rand(0,0.5)));
-  }
-
-  _tryVibrate(ms){if(window.vibrationEnabled&&navigator.vibrate)navigator.vibrate(ms);}
-
-  doubleTap(x,y){
-    if(this.wrinkleIntensity>0.3){
-      this.wrinkleIntensity=Math.max(0,this.wrinkleIntensity-0.3);
-      for(let i=0;i<this.wrinkleMap.length;i++)this.wrinkleMap[i]=Math.max(0,this.wrinkleMap[i]-0.3);
-      audio.playPaperCrinkle(0.5);
+    ctx.restore();
+    
+    // Smooth wrinkle rendering using radial gradients at each wrinkle point
+    if(this.wrinkleIntensity>0.01){
+      ctx.save();
+      for(let gy=0;gy<g.rows;gy+=1)
+        for(let gx=0;gx<g.cols;gx+=1){
+          const wVal=this.wrinkleMap[gy*g.cols+gx];
+          if(wVal<0.08)continue;
+          const cx=gx*g.cellSize+g.cellSize/2, cy=gy*g.cellSize+g.cellSize/2;
+          const dk=Math.min(1,wVal*this.wrinkleIntensity*1.8);
+          const radius = g.cellSize * (0.5 + dk * 1.2);
+          const alpha = dk * 0.4 + 0.05;
+          
+          // Shadow gradient (dark crease)
+          const sh = ctx.createRadialGradient(cx,cy,0,cx,cy,radius);
+          sh.addColorStop(0, 'hsla(30,8%,15%,'+alpha+')');
+          sh.addColorStop(0.4, 'hsla(30,8%,25%,'+(alpha*0.6)+')');
+          sh.addColorStop(1, 'transparent');
+          ctx.fillStyle=sh; ctx.beginPath(); ctx.arc(cx,cy,radius,0,Math.PI*2); ctx.fill();
+          
+          // Highlight (ridge edge) offset from shadow
+          const angle = Utils.noise2D(gx*0.3+this.time*0.01, gy*0.3) * Math.PI;
+          const hx = cx + Math.cos(angle)*radius*0.3;
+          const hy = cy + Math.sin(angle)*radius*0.3;
+          const hl = ctx.createRadialGradient(hx,hy,0,hx,hy,radius*0.5);
+          hl.addColorStop(0, 'hsla(40,15%,75%,'+(alpha*0.4)+')');
+          hl.addColorStop(1, 'transparent');
+          ctx.fillStyle=hl; ctx.beginPath(); ctx.arc(hx,hy,radius*0.5,0,Math.PI*2); ctx.fill();
+          
+          // Connect adjacent wrinkles with curved lines
+          if(dk>0.3 && gx>0 && gy>0){
+            const prev = this.wrinkleMap[(gy-1)*g.cols+(gx-1)];
+            if(prev>0.08){
+              const px=(gx-1)*g.cellSize+g.cellSize/2, py=(gy-1)*g.cellSize+g.cellSize/2;
+              ctx.strokeStyle='hsla(30,8%,20%,'+alpha*0.5+')';
+              ctx.lineWidth=1.5+dk;
+              ctx.beginPath();
+              ctx.moveTo(px+Math.sin(angle)*3,py+Math.cos(angle)*3);
+              ctx.quadraticCurveTo((px+cx)/2,(py+cy)/2-4,cx,cy);
+              ctx.stroke();
+            }
+          }
+        }
+      ctx.restore();
     }
-  }
-
-  update(dt){
-    this.time+=dt;
-    if(Date.now()-this.lastMoveTime>2000&&this.wrinkleIntensity>0)this.wrinkleIntensity=Math.max(0,this.wrinkleIntensity-dt*0.005);
-    this.moveIntensity*=0.92;
-  }
-
-  render() {
+    
+    // Hint text
+    if(this.wrinkleIntensity<0.01&&this.time<2){
+      ctx.save();
+      ctx.globalAlpha=Math.max(0,0.4*(1-this.time/2));
+      ctx.fillStyle='hsla(30,15%,35%,0.6)';
+      ctx.font='15px -apple-system,"PingFang SC",sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText('<-- 按住拖动揉搓 -->',w/2,h/2);
+      ctx.restore();
+    }
+    
+    // Vignette at high intensity
+    if(this.wrinkleIntensity>0.4){
+      const vg=ctx.createRadialGradient(w/2,h/2,w*0.12,w/2,h/2,w*0.55);
+      vg.addColorStop(0,'transparent');
+      vg.addColorStop(1,'rgba(0,0,0,'+((this.wrinkleIntensity-0.4)*0.4)+')');
+      ctx.fillStyle=vg; ctx.fillRect(0,0,w,h);
+    }
+    
+    // Touch glow
+    Object.values(this.touches).forEach(t=>{
+      const glow=ctx.createRadialGradient(t.x,t.y,0,t.x,t.y,50);
+      glow.addColorStop(0,'rgba(255,200,160,0.12)');
+      glow.addColorStop(1,'transparent');
+      ctx.fillStyle=glow; ctx.fillRect(t.x-50,t.y-50,100,100);
+    });
+  }render() {
     const ctx=this.ctx,w=this.width,h=this.height,g=this.wrinkleGrid;
     const bgLit = 82 - this.wrinkleIntensity*12;
     const grad=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)*0.6);
