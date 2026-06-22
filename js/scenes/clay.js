@@ -115,33 +115,56 @@ class ClayScene {
   }
 
   render() {
-    const ctx=this.ctx, w=this.width, h=this.height;
-    if (w <= 0 || h <= 0) return;
-    const bgGrad=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)*0.7);
-    bgGrad.addColorStop(0,'#2A2420'); bgGrad.addColorStop(1,'#1A1816');
-    ctx.fillStyle=bgGrad; ctx.fillRect(0,0,w,h);
-    for (let gy=1; gy<this.gridH-1; gy++)
-      for (let gx=1; gx<this.gridW-1; gx++) {
-        const height=this.grid[gy*this.gridW+gx];
-        if (height<0.01) continue;
-        const x=gx*this.cellSize, y=gy*this.cellSize;
+    const ctx=this.ctx,w=this.width,h=this.height;
+    if(w<=0||h<=0)return;
+    const bg=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)*0.7);
+    bg.addColorStop(0,'#2A2420');bg.addColorStop(1,'#1A1816');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+    
+    // Smooth clay surface with radial gradients
+    for(let gy=2;gy<this.gridH-2;gy+=1)
+      for(let gx=2;gx<this.gridW-2;gx+=1){
+        const hgt=this.grid[gy*this.gridW+gx];
+        if(hgt<0.01)continue;
+        const x=gx*this.cellSize+this.cellSize/2,y=gy*this.cellSize+this.cellSize/2;
         const hL=this.grid[gy*this.gridW+Math.max(0,gx-1)];
         const hR=this.grid[gy*this.gridW+Math.min(this.gridW-1,gx+1)];
         const hU=this.grid[Math.max(0,gy-1)*this.gridW+gx];
         const hD=this.grid[Math.min(this.gridH-1,gy+1)*this.gridW+gx];
-        const nx=(hL-hR)*2, ny=(hU-hD)*2, nz=1;
-        const nl=Math.sqrt(nx*nx+ny*ny+nz*nz);
-        const dot=(nx*0.3-ny*0.5+nz*0.8)/nl;
-        const diffuse=Math.max(0.15, dot*0.7+0.3);
-        const depth=(1-height)*0.3;
-        ctx.fillStyle='rgb('+Math.round((180-depth*50)*(diffuse+0.15))+','+Math.round((140-depth*40)*(diffuse+0.15))+','+Math.round((100-depth*30)*(diffuse+0.15))+')';
-        ctx.fillRect(x,y,this.cellSize,this.cellSize);
+        const nx=(hL-hR)*2,ny=(hU-hD)*2;
+        const nl=Math.sqrt(nx*nx+ny*ny+1);
+        const dot=(nx*0.3-ny*0.5+0.8)/nl;
+        const diff=Math.max(0.12,dot*0.7+0.3);
+        const depth=(1-hgt)*0.3;
+        const radius=this.cellSize*0.9;
+        const grd=ctx.createRadialGradient(x-2,y-2,0,x,y,radius);
+        const r=Math.round((180-depth*55)*(diff+0.15));
+        const g2=Math.round((140-depth*45)*(diff+0.15));
+        const b=Math.round((100-depth*35)*(diff+0.15));
+        grd.addColorStop(0,'rgb('+Math.min(255,r+15)+','+Math.min(255,g2+10)+','+Math.min(255,b+5)+')');
+        grd.addColorStop(0.7,'rgb('+r+','+g2+','+b+')');
+        grd.addColorStop(1,'rgb('+Math.round(r*0.6)+','+Math.round(g2*0.6)+','+Math.round(b*0.6)+')');
+        ctx.fillStyle=grd;ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fill();
       }
+    
+    // Specular highlight (wet clay shine)
+    ctx.save();ctx.globalAlpha=0.04;
+    for(let gy=2;gy<this.gridH-2;gy+=2)
+      for(let gx=2;gx<this.gridW-2;gx+=2){
+        const hgt=this.grid[gy*this.gridW+gx];
+        if(hgt<0.2)continue;
+        const x=gx*this.cellSize+this.cellSize/2,y=gy*this.cellSize+this.cellSize/2;
+        const hl=ctx.createRadialGradient(x-hgt*8,y-hgt*8,0,x-hgt*8,y-hgt*8,hgt*this.cellSize);
+        hl.addColorStop(0,'rgba(255,240,220,'+(hgt*0.15)+')');
+        hl.addColorStop(1,'transparent');
+        ctx.fillStyle=hl;ctx.beginPath();ctx.arc(x-hgt*8,y-hgt*8,hgt*this.cellSize,0,Math.PI*2);ctx.fill();
+      }
+    ctx.restore();
+    
     Object.values(this.touches).forEach(t=>{
-      const glow=ctx.createRadialGradient(t.x,t.y,0,t.x,t.y,35);
-      glow.addColorStop(0,'rgba(255,200,160,0.08)');
-      glow.addColorStop(1,'transparent');
-      ctx.fillStyle=glow; ctx.fillRect(t.x-35,t.y-35,70,70);
+      const glow=ctx.createRadialGradient(t.x,t.y,0,t.x,t.y,40);
+      glow.addColorStop(0,'rgba(255,200,160,0.1)');glow.addColorStop(1,'transparent');
+      ctx.fillStyle=glow;ctx.fillRect(t.x-40,t.y-40,80,80);
     });
-  }destroy() {}
+  } }destroy() {}
 }
