@@ -19,35 +19,68 @@
       <div class="home-greeting">今晚想玩什么？</div>
       <div class="home-subtitle">选一个材质，用手指放松入睡</div>
     </div>
+    <div class="rec-section">
+      <div class="section-label">今日推荐</div>
+      <div class="rec-card" id="rec-card" data-scene="paper">
+        <div class="rec-badge">✨ 推荐</div>
+        <div class="rec-content">
+          <div class="rec-icon" id="rec-scene-icon">🧻</div>
+          <div class="rec-info">
+            <div class="rec-name" id="rec-scene-name">揉纸团</div>
+            <div class="rec-desc" id="rec-scene-desc">手指搓揉，纸张渐皱</div>
+            <div class="rec-meta">
+              <span class="rec-meta-item">🔊 <span id="rec-sound">🌲 森林</span></span>
+              <span class="rec-meta-item">⏱ <span id="rec-duration">15 分钟</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="scene-cards">
       <div class="scene-card" data-scene="paper" style="--card-hue:30">
         <div class="scene-card-icon">🧻</div>
-        <div class="scene-card-name">揉纸团</div>
-        <div class="scene-card-desc">手指搓揉，纸张渐皱</div>
+        <div class="scene-card-body">
+          <div class="scene-card-name">揉纸团</div>
+          <div class="scene-card-desc">手指搓揉，纸张渐皱</div>
+          <div class="scene-card-rating"><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star">★</span></div>
+        </div>
       </div>
       <div class="scene-card" data-scene="sand" style="--card-hue:200">
         <div class="scene-card-icon">🏖️</div>
-        <div class="scene-card-name">拨沙画</div>
-        <div class="scene-card-desc">拨开细沙，浮现图案</div>
+        <div class="scene-card-body">
+          <div class="scene-card-name">拨沙画</div>
+          <div class="scene-card-desc">拨开细沙，浮现图案</div>
+          <div class="scene-card-rating"><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span></div>
+        </div>
       </div>
       <div class="scene-card" data-scene="clay" style="--card-hue:120">
-        <div class="scene-card-icon">🫘</div>
-        <div class="scene-card-name">捏泥巴</div>
-        <div class="scene-card-desc">按压塑形，随心创作</div>
+        <div class="scene-card-icon">🫛</div>
+        <div class="scene-card-body">
+          <div class="scene-card-name">捏泥巴</div>
+          <div class="scene-card-desc">按压塑形，随心创作</div>
+          <div class="scene-card-rating"><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star">★</span><span class="star">★</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="recent-section">
+      <div class="section-label">最近使用</div>
+      <div class="recent-card">
+        <div class="recent-icon" id="recent-scene-icon">—</div>
+        <div class="recent-info">
+          <div class="recent-label">上次使用</div>
+          <div class="recent-name" id="recent-scene-name">暂无</div>
+        </div>
+        <div class="recent-stats">
+          <div class="recent-number" id="recent-total-minutes">0</div>
+          <div class="recent-label">累计分钟</div>
+        </div>
       </div>
     </div>
     <div class="home-footer">
-      <button class="home-footer-btn" id="btn-stats-nav">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-6"/></svg>
-        <span>使用记录</span>
-      </button>
-      <button class="home-footer-btn" id="btn-settings-nav">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        <span>设置</span>
-      </button>
+      <button class="home-footer-btn" id="btn-stats-nav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-6"/></svg><span>使用记录</span></button>
+      <button class="home-footer-btn" id="btn-settings-nav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><span>设置</span></button>
     </div>
   </div>
-
   <!-- SCENE PAGE -->
   <div id="page-scene" class="page">
     <div id="scene-canvas-container">
