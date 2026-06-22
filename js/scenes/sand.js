@@ -52,7 +52,7 @@ class SandScene {
 
   _initParticles(w, h) {
     this.particles = [];
-    const count = Math.min(250, Math.floor(w * h / 2500));
+    const count = Math.min(500, Math.floor(w * h / 1200));
     for (let i = 0; i < count; i++)
       this.particles.push({
         x: Utils.rand(0, w), y: Utils.rand(0, h),
@@ -129,53 +129,30 @@ class SandScene {
   }
 
   render() {
-    const ctx = this.ctx, w=this.width, h=this.height;
-    ctx.drawImage(this.patternCanvas, 0, 0, w, h);
-
-    // Sand layer overlay
-    ctx.save(); ctx.globalAlpha = 0.4;
-    const sandGrad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, Math.max(w,h)*0.6);
-    sandGrad.addColorStop(0, 'hsla(40, 20%, 50%, 0.3)');
-    sandGrad.addColorStop(1, 'hsla(40, 15%, 35%, 0.5)');
-    ctx.fillStyle = sandGrad; ctx.fillRect(0, 0, w, h);
-    ctx.restore();
-
-    // Draw sand particles
-    ctx.save();
-    this.particles.forEach(p => {
-      const rx=Math.floor(p.x/4), ry=Math.floor(p.y/4);
+    const ctx=this.ctx,w=this.width,h=this.height;
+    if(w<=0||h<=0)return;
+    ctx.drawImage(this.patternCanvas,0,0,w,h);
+    ctx.save();ctx.globalAlpha=0.4;
+    const sg=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)*0.6);
+    sg.addColorStop(0,'hsla(38,25%,50%,0.3)');sg.addColorStop(1,'hsla(38,18%,35%,0.5)');
+    ctx.fillStyle=sg;ctx.fillRect(0,0,w,h);ctx.restore();
+    
+    this.particles.forEach(p=>{
+      const rx=Math.floor(p.x/4),ry=Math.floor(p.y/4);
       let reveal=0;
-      if (rx>=0&&rx<this.revealW&&ry>=0&&ry<this.revealH)
-        reveal = this.revealMap[ry*this.revealW+rx];
-      const alpha = Math.max(0.2, p.alpha * (1-reveal*0.7));
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = p.color;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+      if(rx>=0&&rx<this.revealW&&ry>=0&&ry<this.revealH) reveal=this.revealMap[ry*this.revealW+rx];
+      const alpha=Math.max(0.1,p.alpha*(1-reveal*0.85));
+      if(alpha<0.02)return;
+      const grd=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.size+3);
+      grd.addColorStop(0,'hsla('+(35+Math.random()*15)+',25%,'+(62+Math.random()*18)+'%,'+alpha+')');
+      grd.addColorStop(1,'transparent');
+      ctx.fillStyle=grd;ctx.beginPath();ctx.arc(p.x,p.y,p.size+3,0,Math.PI*2);ctx.fill();
     });
-    ctx.restore();
-
-    // Brighten revealed areas
-    ctx.save();
-    ctx.globalAlpha = 0.08;
-    const revCount = this.revealMap.reduce((s,v)=>s+(v>0.1?1:0), 0);
-    if (revCount > 5) {
-      ctx.fillStyle = 'hsla(40, 30%, 70%, 0.1)';
-      ctx.fillRect(0, 0, w, h);
-    }
-    ctx.restore();
-
-    // Touch glow
-    Object.values(this.touches).forEach(t => {
-      const glow = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, 40);
-      glow.addColorStop(0, 'rgba(255,220,180,0.12)');
-      glow.addColorStop(1, 'transparent');
-      ctx.fillStyle = glow; ctx.fillRect(t.x-40, t.y-40, 80, 80);
+    
+    Object.values(this.touches).forEach(t=>{
+      const glow=ctx.createRadialGradient(t.x,t.y,0,t.x,t.y,50);
+      glow.addColorStop(0,'rgba(255,220,180,0.12)');glow.addColorStop(1,'transparent');
+      ctx.fillStyle=glow;ctx.fillRect(t.x-50,t.y-50,100,100);
     });
-  }
-  reset() {
-    this.revealMap = new Float32Array(this.revealW * this.revealH);
-    this._initParticles(this.width, this.height);
-    this.time = 0;
-  }
-  destroy() {}
+  }  destroy() {}
 }
